@@ -1,0 +1,39 @@
+#include <cs50.h>
+#include <stdio.h>
+
+void draw(int h);
+
+int main(void)
+{
+    int h;
+    do {
+        h = get_int("Height: ");
+    }
+    while (h < 1 || h > 8);
+    
+    //draw the bridge
+    draw(h);
+}
+
+void draw(int h)
+{
+    for (int row = 0; row < h; row++)
+    {
+        for (int step = 0; step <= h + row + 3; step++)
+        {
+            if (step <= h-row-1 || (step > h && step <= h + 2))
+            {
+                printf(" ");        
+            }
+            else
+            {
+                printf("#");    
+            }
+        }
+        
+        printf("\n");
+        
+    }
+}
+
+
