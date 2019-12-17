@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <math.h>
+#include <cs50.h>
+
+void count(int c);
+
+int main(void)
+{
+    float f;
+    do
+    {
+        f = get_float("Change: ");
+    }
+     while (f < 0);
+    
+    int c = round(100 * f);
+    printf("Convert to cent: %i units\n",c);
+    
+    count(c);
+}
+
+void count(int c)
+{
+    int n = 0;
+    //25, 10, 5, 1
+    while (c > 0)
+    {
+        if (c >= 25)
+        {
+            n += c/25;
+            c = c % 25;
+        }
+        else if (c >= 10)
+        {
+            n += c/10;
+            c = c % 10;
+        }
+        else if (c >= 5)
+        {
+            n += c/5;
+            c = c % 5;
+        }
+        else
+        {
+            n += c;
+        }
+        
+    }
+    
+    
+    printf("I have %i coin(s)\n",n);
+}
