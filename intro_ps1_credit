@@ -1,0 +1,173 @@
+#include <stdio.h>
+#include <math.h>
+#include <cs50.h>
+
+
+long long power(long long x, int n);
+//int nth_digit(long long x, int order_digit, int num_digit);
+int check_digit(long long x);
+int check_sum(long long x);
+void check_result(long long x);
+
+int main(void)
+{
+    long long x;
+    do
+    {
+        x = get_long_long("Card series: ");    
+    }
+    while (x <= 0);
+    
+    //check_sum(x);
+    check_result(x);
+   
+}
+
+long long power(long long x, int n)
+{
+    long long value = 1;
+    for (int i = 0; i < n; i++)
+    {
+        value *= x;
+    }
+    return value;
+}
+
+// int nth_digit(long long x,int order_digit, int num_digit)
+// {
+    
+//     return (x / power(10,order_digit-1)) % (power(10,num_digit));  
+// }
+
+int check_digit(long long x)
+{
+    int count = 0;
+    for (int i = 1; i <= 17; i++)
+    {
+        long long y = x / power(10, i - 1);
+        //printf("y[%i] = %lli\n",i,y);
+        
+        if (i == 17 && y > 0)
+        {
+            count = 0;
+            break;
+        }
+        else if (y < 10 && i < 17)
+        {
+            count = i;
+            //printf("x has %i digits\n",count);
+            break;
+        }
+        
+    }
+    
+    return count;   
+}
+
+int check_sum(long long x)
+{
+    int n = check_digit(x);
+    int sum_one = 0;
+    int sum_two = 0;
+    
+    if (check_digit(x) == 0)
+    {
+        printf("INVALID\n");
+    }
+    else
+    {
+        for (int i = 1; i <= n; i++)
+        {
+            if ((i % 2) == 0)
+            {
+                if (((x / power(10, i - 1)) % 10) * 2 < 10)
+                {
+                    //printf("Number %i: %lli\n",i,(x / power(10,i-1)) % 10);
+                    sum_two += ((x / power(10, i - 1)) % 10) * 2;    
+                    //printf("sum_two = %i\n\n", sum_two);
+                }
+                else
+                {
+                    //printf("Number %i: %lli\n",i,(x / power(10,i-1)) % 10);
+                    int store = ((x / power(10, i - 1)) % 10) * 2;
+                    sum_two += store / 10 + store % 10;
+                    //printf("sum_two = %i\n\n", sum_two);
+                }
+                
+            }
+            else
+            {
+                //printf("Number %i: %lli\n",i,(x / power(10,i-1)) % 10);
+                sum_one += (x / power(10, i - 1)) % 10;
+            }
+        }
+    }
+    
+    int check = sum_one + sum_two;
+    if (check % 10 == 0)
+    {
+        //printf("sum_one = %i\nsum_two = %i\ncheck = %i\n",sum_one,sum_two,check);
+        return 1;
+    }
+    else
+    {
+        //printf("sum_one = %i\nsum_two = %i\ncheck = %i\n",sum_one,sum_two,check);
+        return 0;
+    }    
+}
+
+void check_result(long long x)
+{
+    int n = check_digit(x);
+    int first_two_digits = x / power(10, n - 2);
+    //printf("n = %i\nfirst_two_digit = %i\ncheck_sum = %i\n",n,first_two_digits,check_sum(x));
+    if (check_sum(x) == 1)
+    {
+        if (n == 16)
+        {
+            if (first_two_digits >= 51 && first_two_digits <= 55)
+            {
+                printf("MASTERCARD\n");
+            }
+            else if (first_two_digits >= 40 && first_two_digits <= 49)
+            {
+                printf("VISA\n");
+            }
+            else
+            {
+                printf("INVALID\n");
+            }
+        }
+        else if (n == 15)
+        {
+            if (first_two_digits == 34 || first_two_digits == 37)
+            {
+                printf("AMEX\n");
+            }
+            else
+            {
+                printf("INVALID\n");
+            }
+        }
+        else if (n == 13)
+        {
+            if (first_two_digits >= 40 && first_two_digits <= 49)
+            {
+                printf("VISA\n");
+            }
+            else
+            {
+                printf("INVALID\n");
+            }
+        }
+        else
+        {
+            printf("INVALID\n");
+        }
+    }
+    else
+    {
+        printf("INVALID\n");
+    }
+    
+}
