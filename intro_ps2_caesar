@@ -103,24 +103,17 @@ int num_converted(int k, char c)
 //     26 < d < 97 => m = (d % 26) + 96
 //     97 <= d <= 122 => m = d  // final case since a remaining of a modulo calculation cannot be higher than modulot itself.
 //     else: m = d (m <= 122 so d <= 122)
-    int d = m % 122;
-    if (d > 0 && d <= 26)
+    int d;
+    if (m <= 122)
     {
-        m = d + 96;
-    }
-    else if (d == 0)
-    {
-        m = 122;
-    }
-    else if (d > 26 && d < 97)
-    {
-        m = (d % 26) + 96;
+        d = m;
     }
     else
     {
-        m = d;
-    }   
-    return m;
+        // one of the great optimization of mine!!!
+        d = ((m % 122) % 26) + 96;    
+    }
+    return d;
 }
 //// We can use function "atoi" to replay for the following functions below ////
 
