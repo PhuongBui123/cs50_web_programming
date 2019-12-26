@@ -1,0 +1,148 @@
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+
+int check_key(string x);
+int num_converted(int k, char c);
+void print_result(string y, int k);
+// void conversion(string z);
+// long long power(int num, int n);
+    
+int main(int argc, string argv[])
+{
+    if (argc == 2 && check_key(argv[1]) == 1)
+    {
+        //printf("success\n");
+        int key = atoi(argv[1]);
+        string plaintext = get_string("Plain text: ");
+        print_result(plaintext, key);
+    }
+    else
+    {
+        printf("key\n");
+    }
+}
+
+// Create a function to check key
+int check_key(string x)
+{
+    string key = x;
+    int i, n = strlen(key), number = 0;
+    // Iterate the argument to check all-digit criterion
+    for (i = 0; i < n; i++)
+    {
+        int check = key[i];
+        if (isdigit(check) != 0)
+        {
+            number++;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    
+    // Check whether all letters within the argument are digits
+    if (number == n)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void print_result(string y, int k)
+{
+    //Interate to check "is alphabet within the a - z"
+    int i, n = strlen(y);
+    printf("ciphertext: ");
+    for (i = 0; i < n; i++)
+    {
+        int store = y[i];
+        char c = y[i];
+        //printf("store = %i\n",store);
+        if (isalpha(c) == 0) // 1 is lowercase, 2 is uppercase
+        {    
+            // if not, keep the letter
+            printf("%c", c);    
+        }
+        else // if correct
+        {    
+            // work with the Upper-case
+            if (store >= 65 && store <= 90)
+            {
+                int z = tolower(c);
+                int m = num_converted(z, k) - 32;
+                //printf("%c and %i\n",m,m);
+                printf("%c", m);
+            }
+            else //just convert as usual
+            {
+                int m = num_converted(c, k);
+                //printf("%c and %i\n",m,m);
+                printf("%c", m);        
+            }        
+        }  
+    }
+    printf("\n");
+}
+
+// function to return the new letters in ASCII within the expected range a - z
+int num_converted(int k, char c)
+{
+    //printf("Character: %c\nASCII code: %i\n", c, c);   
+    int t = c;
+    int m = t + k;
+//    d = m % 122;
+//     d = 0 => m = 122
+//     0 < d <= 26 => m = d + 96
+//     26 < d < 97 => m = (d % 26) + 96
+//     97 <= d <= 122 => m = d  // final case since a remaining of a modulo calculation cannot be higher than modulot itself.
+//     else: m = d (m <= 122 so d <= 122)
+    int d = m % 122;
+    if (d > 0 && d <= 26)
+    {
+        m = d + 96;
+    }
+    else if (d == 0)
+    {
+        m = 122;
+    }
+    else if (d > 26 && d < 97)
+    {
+        m = (d % 26) + 96;
+    }
+    else
+    {
+        m = d;
+    }   
+    return m;
+}
+//// We can use function "atoi" to replay for the following functions below ////
+
+// void conversion(string z)
+// {
+//     int i, n = strlen(z), sum = 0;
+//     for (i = 0; i < n; i++)
+//     {
+//         int store = z[i] - '0';
+//         //printf("z[%i] = %c and store = %i\n",i,z[i],store);
+//         sum += store*(power(10,n-i-1));
+//         //printf("sum = %i\n",sum);
+//     }
+//     return sum;
+// }
+
+// long long power(int num, int n)
+// {
+//     int i, power = 1;
+//     for (i = 0; i < n; i++)
+//     {
+//         power *= num;
+//     }
+//     return power;
+// }
