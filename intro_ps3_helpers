@@ -1,0 +1,285 @@
+#include "helpers.h"
+#include <math.h>
+
+// Convert image to grayscale
+void grayscale(int height, int width, RGBTRIPLE image[height][width])
+{
+    for (int r = 0; r < height; r++)
+    {
+        for (int c = 0; c < width; c++)
+        {
+            // Since the rgbt variables are integer, all of them have to be converted to float to show the decimal parts!!!
+            // Convert float type to integer type with rounded value
+            int mid_color = round((image[r][c].rgbtRed + image[r][c].rgbtGreen + image[r][c].rgbtBlue) / 3.0);
+            image[r][c].rgbtRed = mid_color;
+            image[r][c].rgbtGreen = mid_color;
+            image[r][c].rgbtBlue = mid_color;
+        }
+    }
+    return;
+}
+
+// Convert image to sepia
+void sepia(int height, int width, RGBTRIPLE image[height][width])
+{
+    for (int r = 0; r < height; r++)
+    {
+        for (int c = 0; c < width; c++)
+        {
+            // Formula to convert original colors to the sepia ones
+            int sepiaRed = round(0.393 * image[r][c].rgbtRed + 0.769 * image[r][c].rgbtGreen + 0.189 * image[r][c].rgbtBlue);
+            int sepiaGreen = round(0.349 * image[r][c].rgbtRed + 0.686 * image[r][c].rgbtGreen + 0.168 * image[r][c].rgbtBlue);
+            int sepiaBlue = round(0.272 * image[r][c].rgbtRed + 0.534 * image[r][c].rgbtGreen + 0.131 * image[r][c].rgbtBlue);
+            // if number > 255, then 255 else sepia color
+            // Red
+            if (sepiaRed > 255)
+            {
+                image[r][c].rgbtRed = 255;
+            }
+            else
+            {
+                image[r][c].rgbtRed = sepiaRed;
+            }
+            // Blue
+            if (sepiaBlue > 255)
+            {
+                image[r][c].rgbtBlue = 255;
+            }
+            else
+            {
+                image[r][c].rgbtBlue = sepiaBlue;
+            }
+            // Green
+            if (sepiaGreen > 255)
+            {
+                image[r][c].rgbtGreen = 255;
+            }
+            else
+            {
+                image[r][c].rgbtGreen = sepiaGreen;
+            }
+        }
+    }
+    return;
+}
+
+// Reflect image horizontally
+void reflect(int height, int width, RGBTRIPLE image[height][width])
+{
+    for (int r = 0; r < height; r++)
+    {
+        //if width is an odd number, the middle number is no need to be reflected. Hence, we add 1 more unit of lenght for the loop to skip the reflection
+        int n = width / 2;
+        if (width % 2 != 0)
+        {
+            n++;
+        }
+        // Swap values
+        for (int c = 0; c < n; c++)
+        {
+            RGBTRIPLE store;
+            store = image[r][c];
+            image[r][c] = image[r][width - c - 1];
+            image[r][width - c - 1] = store;
+        }
+    }
+    return;
+}
+
+// Blur image
+void blur(int height, int width, RGBTRIPLE image[height][width])
+{
+    // Key highlight here!!!!!
+    // Since blur function will mess up with all pixels so we need to work with a copy of the image, then assign the expected results back to the original pixels
+    RGBTRIPLE avatar[height][width];
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            avatar[i][j] = image[i][j];
+        }
+    }
+
+    // Start to work on the copy of image pixels
+    for (int r = 0, midRed, midGreen, midBlue, count, n, m; r < height; r++)
+    {
+        for (int c = 0; c < width; c++)
+        {
+            midRed = midGreen = midBlue = count = n = m = 0;
+            ///-- 4 main CASES -- ///
+            // Case 1: r == 0
+            if (r == 0)
+            {
+                if (c == 0) //UPPER left CORNER
+                {
+                    // starting row
+                    n = 0;
+                    // starting column
+                    m = 0;
+                }
+                else if (c == width - 1) //UPPER right CORNER
+                {
+                    // starting row
+                    n = 0;
+                    // starting column
+                    m = c - 1;
+                }
+                else if (c > 0 && c < (width - 1)) // pixels in the upper edge
+                {
+                    // starting row
+                    n = 0;
+                    // starting column
+                    m = c - 1;
+                }
+
+                // calculate midRed by a loop
+                if (c == 0 || c == (width - 1))
+                {
+                    for (int i = n; i < n + 2; i++)
+                        for (int j = m; j < m + 2; j++)
+                        {
+                            midRed += avatar[i][j].rgbtRed;
+                            midGreen += avatar[i][j].rgbtGreen;
+                            midBlue += avatar[i][j].rgbtBlue;
+                            count++;
+                        }
+                }
+                else if (c > 0 && c < (width - 1))
+                {
+                    for (int i = n; i < n + 2; i++)
+                        for (int j = m; j < m + 3; j++)
+                        {
+                            midRed += avatar[i][j].rgbtRed;
+                            midGreen += avatar[i][j].rgbtGreen;
+                            midBlue += avatar[i][j].rgbtBlue;
+                            count++;
+                        }
+                }
+
+            }
+            // Case 2: r = height - 1
+            else if (r == (height - 1))
+            {
+                if (c == 0) // LOWER RIGHT CORNER
+                {
+                    // starting row
+                    n = r - 1;
+                    // starting column
+                    m = c;
+                }
+                else if (c == width - 1) // LOWER LEFT CORNER
+                {
+                    // starting row
+                    n = r - 1;
+                    // starting column
+                    m = c - 1;
+                }
+                else if (c > 0 && c < (width - 1)) // LOWER EDGE
+                {
+                    // starting row
+                    n = r - 1;
+                    // starting column
+                    m = c - 1;
+                }
+
+                // calculate midRed by a loop
+                if (c == 0 || c == (width - 1))
+                {
+                    for (int i = n; i < n + 2; i++)
+                        for (int j = m; j < m + 2; j++)
+                        {
+                            midRed += avatar[i][j].rgbtRed;
+                            midGreen += avatar[i][j].rgbtGreen;
+                            midBlue += avatar[i][j].rgbtBlue;
+                            count++;
+                        }
+                }
+                else if (c > 0 && c < (width - 1))
+                {
+                    for (int i = n; i < n + 2; i++)
+                        for (int j = m; j < m + 3; j++)
+                        {
+                            midRed += avatar[i][j].rgbtRed;
+                            midGreen += avatar[i][j].rgbtGreen;
+                            midBlue += avatar[i][j].rgbtBlue;
+                            count++;
+                        }
+                }
+
+            }
+            // Case 3: The others
+            else if (r > 0 && r < (height - 1))
+            {
+                if (c == 0) // Left Edge
+                {
+                    // starting row
+                    n = r - 1;
+                    // starting column
+                    m = c;
+                }
+                else if (c == width - 1) // Right Edge
+                {
+                    // starting row
+                    n = r - 1;
+                    // starting column
+                    m = c - 1;
+                }
+                else if (c > 0 && c < (width - 1)) // All pixels not on the edges
+                {
+                    // starting row
+                    n = r - 1;
+                    // starting column
+                    m = c - 1;
+                }
+
+                // calculate midRed by a loop
+                if (c == 0 || c == (width - 1))
+                {
+                    for (int i = n; i < n + 3; i++)
+                        for (int j = m; j < m + 2; j++)
+                        {
+                            midRed += avatar[i][j].rgbtRed;
+                            midGreen += avatar[i][j].rgbtGreen;
+                            midBlue += avatar[i][j].rgbtBlue;
+                            count++;
+                        }
+                }
+                else if (c > 0 && c < (width - 1))
+                {
+                    for (int i = n; i < n + 3; i++)
+                        for (int j = m; j < m + 3; j++)
+                        {
+                            midRed += avatar[i][j].rgbtRed;
+                            midGreen += avatar[i][j].rgbtGreen;
+                            midBlue += avatar[i][j].rgbtBlue;
+                            count++;
+                        }
+                }
+
+            }
+            // Case 4: all the pixels NOT on the edges
+            else if (r > 0 && r < (height - 1) && c > 0 && c < (width - 1))
+            {
+                // starting row
+                n = r - 1;
+                // starting column
+                m = c - 1;
+                // calculate midRed by a loop
+                for (int i = n; i < n + 3; i++)
+                    for (int j = m; j < m + 3; j++)
+                    {
+                        midRed += avatar[i][j].rgbtRed;
+                        midGreen += avatar[i][j].rgbtGreen;
+                        midBlue += avatar[i][j].rgbtBlue;
+                        count++;
+                    }
+            }
+
+            // convert integer to float then convert the division back to integer!!!
+            image[r][c].rgbtRed = round(midRed / (count * 1.0));
+            image[r][c].rgbtGreen = round(midGreen / (count * 1.0));
+            image[r][c].rgbtBlue = round(midBlue / (count * 1.0));
+        }
+    }
+    return;
+}
