@@ -1,0 +1,221 @@
+// reference: https://gist.github.com/yangrq1018/e769abd7489ea8f52351b30829796a15
+
+// Implements a dictionary's functionality
+
+#include <stdbool.h>
+#include "dictionary.h"
+#include <strings.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <cs50.h>
+
+// Represents a node in a hash table
+typedef struct node
+{
+    char word[LENGTH + 1];
+    struct node *next;
+}
+node;
+
+// Number of buckets in hash table -> N = 262626 because there are 26 alphabetical letters and we will base on the first 3 letters.
+// Note: the larger N shows potentially the faster search times
+//const unsigned int N = 262626;
+const unsigned int N = 65536;
+
+// Hash table
+node *table[N];
+
+// Dictionary size
+int count = 0;
+
+// Returns true if word is in dictionary else false
+bool check(const char *word)
+{
+    // TODO
+    // // Apply hash function to identify the index
+    // int index = hash(word);
+    // // Go directly to the index of the table generated from the hash function
+    // node *cursor = table[index];
+    // // Use a loop to traverse the value in a bucket of the linked list
+    // while (cursor != NULL)
+    // {
+    //     if (strcasecmp(cursor-> word, word) == 0)
+    //     {
+    //         return true;
+    //     }
+    //     else
+    //     {
+    //         cursor = cursor-> next;
+    //     }
+    // }
+    // return false;
+
+    int len = strlen(word);
+    char lword[len + 1];
+    for (int i = 0; i < len; i++)
+    {
+        lword[i] = tolower(word[i]);
+    }
+    lword[len] = '\0';
+
+    int bucket = hash(lword);
+    node *cursor = table[bucket];
+    while (cursor != NULL)
+    {
+        if (strcasecmp(cursor->word, lword) != 0)
+        {
+            cursor = cursor-> next;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Hashes word to a number
+unsigned int hash(const char *word)
+{
+    // TODO
+    //--- self-built hash function is not completed yet
+    // int store = 0;
+    // for (int i = 0, n = strlen(word); i < n; i++)
+    // {
+    //     if (convert(word[i]) >= 10)
+    //     {
+    //         store += convert(word[i])*tenpower(n - i - 1)*tenpower(n - i - 1);
+    //     }
+    //     else
+    //     {
+    //         store += convert(word[i])*tenpower(n - i - 1);
+    //     }
+    // }
+    // return store;
+
+    unsigned int hash = 0;
+    for (int i = 0, n = strlen(word); i < n; i++)
+    {
+        hash = (hash << 2) ^ word[i];
+    }
+    return hash % N;
+}
+
+// Loads dictionary into memory, returning true if successful else false
+bool load(const char *dictionary)
+{
+    // TODO
+    //-- Step 1: Open dictionary file
+    FILE *file = fopen(dictionary, "r");
+    if (file == NULL)
+    {
+        printf("Could not open %s.\n", dictionary);
+        return false;
+    }
+
+    //-- Step 2: Read strings from file one at a time
+    //Declare a buffer to represent each word in dictionary temporarily
+    char w[LENGTH + 1];
+    //Run a loop to scan the dictionary
+    while (fscanf(file, "%s", w) != EOF)
+    {
+        //-- Step 3: Create a new node for each word
+        node *n = malloc(sizeof(node));
+        if (n == NULL)
+        {
+            printf("Out of memory\n");
+            return false;
+        }
+        strcpy(n-> word, w);
+        n-> next = NULL;
+
+        //-- Step 4: Hash word to obtain a hash value/index
+        int index = hash(w);
+
+        //-- Step 5: Insert node into hash table at that location -> add a new node into a linked list
+        //if the corresponding hash value is an empty bucket, directly assign the new node to it
+
+        if (table[index] == NULL)
+        {
+            table[index] = n;
+        }
+        //else the new element is added via a linked list
+        else
+        {
+            n-> next = table[index];
+            table[index] = n;
+        }
+        // after all, increase the "count" variable to adjust the dictionary size
+        count++;
+    }
+    //close file after loading
+    fclose(file);
+    return true;
+}
+
+// Returns number of words in dictionary if loaded else 0 if not yet loaded
+unsigned int size(void)
+{
+    // TODO
+    return count;
+}
+
+// Declare a function to support for the unload function
+void recursor(node *temp)
+{
+    if (temp-> next != NULL)
+    {
+        recursor(temp-> next);
+    }
+    free(temp);
+}
+
+// Unloads dictionary from memory, returning true if successful else false
+bool unload(void)
+{
+    // TODO
+    // for (int i = 0; i < N; i++)
+    // {
+    //     node *cursor = table[i];
+    //     node *temp = malloc(sizeof(node));
+    //     temp = table[i];
+    //     while (cursor != NULL)
+    //     {
+    //         cursor = cursor-> next;
+    //         free(temp);
+    //     }
+    // }
+    // return false;
+
+    for (int i = 0; i < N; i++)
+    {
+        if (table[i] != NULL)
+        {
+            recursor(table[i]);
+        }
+    }
+    return true;
+}
+
+// int tenpower(int n)
+// {
+//     int store = 1;
+//     for (int i = 0; i < n; i++)
+//     {
+//         store *= 10;
+//     }
+//     return store;
+// }
+
+// int convert(char x)
+// {
+//     int c = x;
+//     // Incase whether there are any capitalized character
+//     if (c >= 65 && c <= 90)
+//     {
+//         c += 32;
+//     }
+//     return c - 97;
+// }
