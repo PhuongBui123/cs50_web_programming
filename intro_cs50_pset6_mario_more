@@ -1,0 +1,11 @@
+def height(h):
+    for i in range(h):
+        print((h - (i + 1))*" " + (i + 1)*"#" + " "*2 + (i + 1)*"#")
+
+
+# declare a false value to start the checking loop
+h = "abc"
+while h.isdigit() == False or int(h) <= 0 or int(h) > 8:
+    h = input("Height: ")
+
+height(int(h))
