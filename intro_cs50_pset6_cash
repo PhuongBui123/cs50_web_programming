@@ -1,0 +1,37 @@
+from math import floor
+
+
+def cash(dollars):
+    print(f"Change owed {dollars}")
+    cents = round(dollars * 100)
+    #print("Cents: ",cents)
+    li = [25, 10, 5, 1]
+    total = 0
+
+    for step in li:
+        count = 0
+        if (cents % step) == 0:
+            count = cents / step
+            #print("{} have {} coin(s)".format(step, count))
+            total += count
+            break
+        elif cents >= step:
+            count = floor(cents/step)
+            cents = cents % step
+        #print("%i have %i coin(s)" %(step, count))
+        total += count
+
+    #print("Total coins usd: ",int(total))
+    print(int(total))
+
+
+# Main
+dollars = -1  # just to start the "while" loop
+
+while dollars < 0:
+    try:
+        dollars = float(input("Dollars: "))
+    except:
+        pass
+
+cash(dollars)
