@@ -1,0 +1,57 @@
+import re
+text = input("Text: ")
+
+
+def readability(text):
+    # Regx: (?!\s) matches (\w+) matches (((?!\s) matches (\W)?) matches \w+)?
+    # "\w+" = word-related pattern but non-greedy
+    # (?!\s)(\W)? = (discarding whitespace) matches (0 or 1 non-world-related pattern)
+    # "+" causes the resulting RE to match 1 or more repetitions of the preceding RE. ab+ will match ‘a’ followed by any non-zero number of ‘b’s; it will not match just ‘a’.
+    w_pattern = "(?!\s)(\w+)(((?!\s)(\W)?)\w+)?"
+    # Reduce 1 because the regex count the last whitespace
+    w = sum(1 for i in re.finditer(w_pattern, text))
+
+    # Regx: letter only
+    l_pattern = "[a-z]"
+    l = sum(1 for i in re.finditer(l_pattern, text, re.IGNORECASE))
+
+    # Regx: ([\.\?\!].?)(\s) OR ([\.\?\!].?)$
+    # Group 1: "." or "?" or "!" matches with a whitespace
+    # Group 2: "." or "?" or "!" at the end of the string
+    s_pattern = "(\S)([\.\?\!].?)(\s)|([\.\?\!].?)$"
+    s = sum(1 for i in re.finditer(s_pattern, text))
+
+    '''
+    # Debug block
+    for match in re.finditer(w_pattern, text):
+        c = match.start()
+        e = match.end()
+        print('Match: {} {}:{}'.format(text[c:e], c, e))
+
+    print("Count =", w)
+    '''
+
+    '''
+    # Result checking
+    print("Total words = {}\nTotal letters = {}\nTotal sentences = {}".format(w,l,s))
+
+    '''
+
+    # Convert to 100 word-base and calculate index
+    index = 0.0588 * (l / w * 100) - 0.296 * (s / w * 100) - 15.8
+    # Initialize an "ind" variable to check the index's value
+    '''
+    print("L = {}; S = {}; W = {}".format(l, s, w))
+    print("L / W * 100 = {}\nS / W * 100 = {}".format(l / w * 100, s / w * 100))
+    '''
+    if index < 0:
+        print("Before Grade 1")
+    elif index >= 16:
+        print("Grade 16+")
+    else:
+        print("Grade:", round(index))
+    #print("Grade: {} {}".format(index,ind))
+
+
+readability(text)
+
