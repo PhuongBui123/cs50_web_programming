@@ -1,0 +1,139 @@
+from sys import argv, exit
+from csv import reader, DictReader
+from re import finditer
+
+large = "AGATC,TTTTTTCT,AATG,TCTAG,GATA,TATC,GAAA,TCTG".split(',')
+small = "AGATC,AATG,TATC".split(',')
+
+
+def main():
+    # Check command-line arguments
+    if len(argv) != 3:
+        print("Usage: python dna.py data.csv sequence.txt")
+        exit(1)
+    else:
+        database = argv[1]
+        sequence = argv[2]
+        # To store the STRs' name from database
+        strs = strs_find(database)
+        # To store the STRs computed in sequence
+        str_dict = compute(sequence, strs)
+        # print(str_dict)
+
+        # To sotre the dna from database
+        dna = load_csv(database, strs)
+
+        # Check the exist of needed variables
+        '''
+        print("STRs:", strs)
+        print("dna:", dna)
+        print("str_dict =", str_dict)
+        '''
+
+        # Results
+        #print("\nFinal result:")
+        check(dna, str_dict)
+
+        exit(0)
+
+##--Declare functions--#
+# Initialize headers:
+
+
+def strs_find(database):
+    if "large" in database:
+        return large
+    elif "small" in database:
+        return small
+
+# Initialize a dictionary to store the dna list
+
+
+def load_csv(database, strs):
+    dna_store = dict()
+    # convert database info to "dna" dictionary
+    with open(database, "r") as file:
+        # Use for csv files
+        file_read = DictReader(file, delimiter=",")
+        for row in file_read:
+            temp_list = [(col, int(row[col])) for col in strs]
+            dna_store[row['name']] = temp_list
+    return dna_store
+
+
+def count_p(pattern, text):
+    count = 0
+    store = [0]
+    l = len(pattern)
+    for match in finditer(pattern, text):
+        s = match.start()
+        e = match.end()
+        temp = text[s - l: e - l]
+        if temp == pattern and count >= 1:
+            #print("Match: {} at {}:{}".format(text[s:e], s, e))
+            count += 1
+        else:
+            # count and call out the first str of the series of strs
+            #print("Match: {} at {}:{}".format(text[s:e], s, e))
+            count = 1
+        # "store" variable is used to contain all the possible consecutive strs
+        store.append(count)
+    #print("store:", store)
+
+    return max(store)
+
+# Compute number of STRs in text
+
+
+def compute(sequence, strs):
+    str_store = dict()
+    with open(sequence, "r") as file:
+        # Use to read a txt file
+        file_read = file.read()
+        for pattern in strs:
+            # initialze "key: value" pair in str_store dictionary
+            str_store[pattern] = count_p(pattern, file_read)
+    return str_store
+
+
+# Check the result
+def check(dna, str_dict):
+    # check
+    # dna = {name1: [(str1, #1), (str2, #2), (str3, #3)], name2: [(str1, #1), (str2, #2), (str3, #3)],...}
+    for name in dna:
+        # name is the key of dna dictionary
+        count = 0
+        for i in dna[name]:
+            # dna[name] is the corresponding value, which is a list
+            # i is the value in the dna[name] list, which is a tuple
+            for j in str_dict:
+                # j is the key in "str_result" dictionary
+                if j == i[0] and str_dict[j] == i[1]:
+                    count += 1
+
+        #print("count =", count," Name:", end = " ")
+        if count == 3 or count == 8:
+            print(name)
+            return True
+        else:
+            continue
+
+    print("No match")
+    return False
+
+
+##--Main--##
+main()
+
+
+# Tips:
+# create a dictionary
+'''
+con = "y"
+while(con == "y"):
+    k = input("key = ")
+    v = input("value = ")
+    d[k] = v
+    con = input("y/n: ")
+'''
+
